@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RUN CO2BLOCK</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+     <h1>Enter Simulation Parameters</h1>
+     <!-- Link to the external JavaScript file -->
+     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+     <!-- Display flashed messages -->
+     {% with messages = get_flashed_messages(with_categories=True) %}
+     {% if messages %}
+         <div class="flashed-messages">
+             {% for category, message in messages %}
+                 <div class="alert alert-{{ category }}">{{ message }}</div>
+             {% endfor %}
+         </div>
+     {% endif %}
+     {% endwith %}
+
+     <form action="{{ url_for('run') }}" method="POST" onsubmit="clearAllAlerts()">
+         <label for="correction">Correction:</label>
+         <select name="correction" id="correction">
+             <option value="on">On</option>
+             <option value="off" selected>Off</option>
+         </select><br>
+
+         <label for="dist_min">Minimum Inter-Well Distance (km):</label>
+         <input type="text" name="dist_min" id="dist_min" value="10"><br>
+
+         <label for="dist_max">Maximum Inter-Well Distance (km):</label>
+         <input type="text" name="dist_max" id="dist_max" value="auto"><br>
+
+         <label for="nr_dist">Number of Distances to Explore:</label>
+         <input type="text" name="nr_dist" id="nr_dist" value="10"><br>
+
+         <label for="nr_well_max">Maximum Number of Wells:</label>
+         <input type="text" name="nr_well_max" id="nr_well_max" value="15"><br>
+
+         <label for="rw">Well Radius (m):</label>
+         <input type="text" name="rw" id="rw" value="0.1"><br>
+
+         <label for="time_yr">Time of Injection (years):</label>
+         <input type="text" name="time_yr" id="time_yr" value="30"><br>
+
+         <label for="maxQ">Maximum Injection Rate:</label>
+         <input type="text" name="maxQ" id="maxQ" value="2"><br>
+
+         <input type="submit" id='runLink' value="Run">
+    </form>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "exec_path": "C:\\Users\\14569\\Desktop\\IRP\\dev\\CO2BLOCK\\executables\\CO2BLOCK.exe",
+  "current_dir": "C:\\Users\\14569\\Desktop\\IRP\\dev\\",
+  "outputs_dir": "output\\",
+  "output_name": ["MaxFlowRatePerWell.png","MaxSustainableStorage.png",
+    "Q_M_max_per_well_inj_rate.xls","V_M_max_storage_capacity.xls"],
+  "optimize_name": "optimize.png"
+}
