@@ -6,7 +6,6 @@ import subprocess
 import matplotlib.pyplot as plt
 import os
 import json
-from math import isnan
 
 bp = Blueprint('routes', __name__)
 
