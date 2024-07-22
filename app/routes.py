@@ -6,6 +6,7 @@ import subprocess
 import matplotlib.pyplot as plt
 import os
 import json
+from math import isnan
 
 bp = Blueprint('routes', __name__)
 
@@ -46,9 +47,9 @@ def send_reservoirs():
 
 @bp.route('/save-inputs', methods=['POST'])
 def save_inputs():
-    if os.path.exists(fpath + fname):
+    if os.path.exists(os.path.join(fpath, fname)):
         try:
-            os.remove(fpath + fname)
+            os.path.join(fpath, fname)
         except Exception as e:
             print(e)
 
@@ -72,7 +73,8 @@ def save_inputs():
             df[column][0] = 0.0
         else:
             df[column][0] = float(value)
-    df.to_excel(fpath + fname, index=False)
+    print(df)
+    df.to_excel(os.path.join(fpath, fname), index=False)
     return 'backend received inputs', 201
 
 
@@ -111,6 +113,8 @@ def run_executable(correction, dist_min, dist_max, nr_dist, nr_well_max, rw, tim
 
     if result.returncode != 0:
         return 'returncode:' + str(result.returncode) + '\n' + result.stderr
+    else:
+        print(result.stdout)
     return 0
 
 
@@ -151,16 +155,19 @@ def revenue_optimization():
     capture_cost_rate, transport_cost_rate = rates['capture_cost'], rates['transport_cost']
     revenue_rates = rates['revenue']
 
-    try:
-        temp = pd.read_excel(fpath + fname)
-        name = temp['name'][0]
-    except Exception as e:
-        name = 'Unknown'
-
     if readOutputs:
         well_num = max_storage_each_wellNum()
+        try:
+            temp = pd.read_excel(os.path.join(fpath, fname))
+            name = str(temp['name'][0])
+            if (name == '') | (name is None) | (name == 'nan'):
+                name = 'Unknown'
+        except Exception as e:
+            name = 'Unknown'
     else:
         well_num = max_storage_each_wellNum(None)
+        name = 'Unknown'
+
     costs = cost_calculation(well_num, capture_rate=capture_cost_rate, transport_rate=transport_cost_rate)
 
     revenues, well_nums = [], []
@@ -205,8 +212,8 @@ def max_storage_each_wellNum(max_storage_file=outputs_dir + outputs[3]):
 
 def cost_calculation(well_num_storage, capture_rate=50, transport_rate=8):
     costs = []
-    df = pd.read_excel(fpath + fname)
-    drilling_cost = float(df['meanDepth'][0])*26
+    df = pd.read_excel(os.path.join(fpath, fname))
+    drilling_cost = float(df['meanDepth'][0]) * 26
     for pairs in well_num_storage:
         well_num, storage = pairs['wellNum'], pairs['maxStorage']
         fixed_cost = 8200 * well_num
