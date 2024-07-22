@@ -124,6 +124,7 @@ wrapt==1.14.1
 xlrd==2.0.1
 xyzservices==2024.4.0
 y-py==0.5.3
+scipy
 ypy-websocket==0.7.1
 zipp==3.18.1
 gunicorn==20.1.0
