@@ -205,9 +205,10 @@ def max_storage_each_wellNum(max_storage_file=outputs_dir + outputs[3]):
 
 def cost_calculation(well_num_storage, capture_rate=50, transport_rate=8):
     costs = []
+    df = pd.read_excel(fpath + fname)
+    drilling_cost = float(df['meanDepth'][0])*26
     for pairs in well_num_storage:
         well_num, storage = pairs['wellNum'], pairs['maxStorage']
-        drilling_cost = 0
         fixed_cost = 8200 * well_num
         surface_cost = 6120 * well_num
         site_cost = 24097
