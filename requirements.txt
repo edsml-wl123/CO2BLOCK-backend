@@ -1,6 +1,8 @@
 Flask
 Flask-Cors
+openpyxl
 matplotlib
 pandas
 numpy
+xlrd
 gunicorn
