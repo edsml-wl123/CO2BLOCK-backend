@@ -9,9 +9,9 @@ import json
 
 bp = Blueprint('routes', __name__)
 
-# project_dir = os.getcwd()
-current_dir=os.getcwd()
-project_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
+project_dir = os.getcwd()
+# current_dir=os.getcwd()
+# project_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 with open('config.json', 'r') as file:
     settings = json.load(file)
     exec_path = os.path.join(project_dir, settings['exec_path'])
