@@ -1,8 +1,6 @@
 # app/__init__.py
 from flask import Flask
 from flask_cors import CORS
-import os
-import json
 
 
 def create_app():
