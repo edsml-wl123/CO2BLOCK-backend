@@ -30,7 +30,7 @@ entered_inputs, entered_limits, optimize_inputs = {}, {}, None
 
 @bp.route('/', methods=['GET'])
 def home():
-    return render_template('index.html')
+    return render_template(os.path.join(project_dir, 'templates\\index.html'))
 
 
 @bp.route('/reservoirs', methods=['GET'])
