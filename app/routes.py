@@ -32,7 +32,7 @@ entered_inputs, entered_limits, optimize_inputs = {}, {}, None
 
 @bp.route('/', methods=['GET'])
 def home():
-    return render_template('index.html')
+    return 'Backend Server'
 
 
 @bp.route('/reservoirs', methods=['GET'])
