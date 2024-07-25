@@ -18,6 +18,7 @@ function CO2BLOCK(varargin)
     % Input parsing
 
     if nargin < 10
+        display(varargin{0});
         error('Insufficient input arguments.');
     end
 
@@ -101,6 +102,8 @@ function CO2BLOCK(varargin)
 
     saveas(figure1, fullfile(outputDir, 'MaxFlowRatePerWell.png'));
     saveas(figure2, fullfile(outputDir, 'MaxSustainableStorage.png'));
+    close(figure1);  % Close figure1
+    close(figure2);  % Close figure2
     writetable(Table_Q,fullfile(outputDir,'Q_M_max_per_well_inj_rate.xls'), 'WriteRowNames',true);
     writetable(Table_V,fullfile(outputDir,'V_M_max_storage_capacity.xls'), 'WriteRowNames',true);
 end
