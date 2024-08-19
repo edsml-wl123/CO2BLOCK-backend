@@ -1,5 +1,6 @@
 {
   "exec_path": "CO2BLOCK/executables/CO2BLOCK.exe",
+  "data_path": "CO2BLOCK/data/",
   "reservoir_data_path": "CO2BLOCK/data/reservoir_data.xlsx",
   "outputs_dir": "output/",
   "output_name": ["MaxFlowRatePerWell.png","MaxSustainableStorage.png",

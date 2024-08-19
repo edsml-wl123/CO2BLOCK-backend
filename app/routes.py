@@ -10,18 +10,15 @@ import json
 bp = Blueprint('routes', __name__)
 
 project_dir = os.getcwd()
-# current_dir=os.getcwd()
-# project_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 with open('config.json', 'r') as file:
     settings = json.load(file)
     exec_path = os.path.join(project_dir, settings['exec_path'])
     reservoir_data = os.path.join(project_dir, settings['reservoir_data_path'])
+    data_dir = os.path.join(project_dir, settings['data_path'])
     outputs_dir = os.path.join(project_dir, settings['outputs_dir'])
     outputs = settings['output_name']
     optimize_path = os.path.join(project_dir, outputs_dir, settings['optimize_name'])
     optimize_output = settings['optimize_name']
-
-# print(project_dir, cur_dir, exec_path, exec_path, reservoir_data, outputs_dir, optimize_path)
 
 fpath = project_dir
 fname = 'temp.xlsx'
@@ -134,14 +131,22 @@ def serve_output(filename):
 def get_max_scenario():
     df = pd.read_excel(outputs_dir + outputs[3])
     df_value = df.iloc[:, 1:]
+    # print(df_value)
 
     max_value = df_value.max().max()
     max_location = df_value.stack().idxmax()
+
     row_header = df.iloc[max_location[0], 0]
     column_header = max_location[1]
+    column_index = df.columns.get_loc(column_header)
     wellNum = int(row_header)
     wellDistance = int(column_header.split('_')[4])
-    return {"maxStorage": max_value, "wellNum": wellNum, "wellDistance": wellDistance}
+
+    df = pd.read_excel(outputs_dir + outputs[2])
+    df_value = df.iloc[:, 1:]
+    # print(df_value)
+    flowRate = float(df.iloc[max_location[0], column_index])
+    return {"maxStorage": max_value, "wellNum": wellNum, "wellDistance": wellDistance, "flowRate": flowRate}
 
 
 @bp.route('/optimize/run', methods=['POST'])
@@ -216,6 +221,7 @@ def cost_calculation(well_num_storage, capture_rate=50, transport_rate=8):
     df = pd.read_excel(os.path.join(fpath, fname))
     drilling_cost = float(df['meanDepth'][0]) * 26
     for pairs in well_num_storage:
+        # print(pairs)
         well_num, storage = pairs['wellNum'], pairs['maxStorage']
         fixed_cost = 8200 * well_num
         surface_cost = 6120 * well_num
@@ -253,3 +259,15 @@ def get_optimize_result():
 @bp.route('/optimize/result/<filename>')
 def serve_optimize(filename):
     return send_from_directory(outputs_dir, filename)
+
+
+@bp.route('/help', methods=['GET'])
+def get_example():
+    examples_urls = [url_for('routes.serve_output', filename=name) for name in
+                    ['example_data.xlsx', 'V_M_max_storage_capacity.xls']]
+    return jsonify(examples_urls)
+
+
+@bp.route('/help/<filename>')
+def serve_example(filename):
+    return send_from_directory(data_dir, filename)
