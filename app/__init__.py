@@ -1,4 +1,4 @@
-# created by wl123
+# created by Wenxin Li, github name wl123
 #
 # app/__init__.py
 from flask import Flask

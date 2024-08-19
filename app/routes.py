@@ -1,4 +1,4 @@
-# created by wl123
+# created by Wenxin Li, github name wl123
 #
 # app/routes.py
 from flask import Blueprint, jsonify, request, render_template, send_from_directory, url_for, current_app
@@ -280,7 +280,7 @@ def serve_optimize(filename):
 @bp.route('/help', methods=['GET'])
 def get_example():
     examples_urls = [url_for('routes.serve_example', filename=name) for name in
-                     ['example_data.xlsx', 'V_M_max_storage_capacity.xls']]
+                     ['example_inputs.xlsx', 'example_V_M.xls']]
     return jsonify(examples_urls)
 
 

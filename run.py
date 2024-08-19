@@ -1,4 +1,4 @@
-# created by wl123
+# created by Wenxin Li, github name wl123
 #
 # run.py
 from app import create_app
