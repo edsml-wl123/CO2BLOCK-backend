@@ -1,3 +1,5 @@
+# created by wl123
+#
 # app/routes.py
 from flask import Blueprint, jsonify, request, render_template, send_from_directory, url_for, current_app
 import pandas as pd
@@ -9,8 +11,8 @@ import json
 
 bp = Blueprint('routes', __name__)
 
-project_dir = os.getcwd()
-with open('config.json', 'r') as file:
+project_dir = os.getcwd()  # get absolute path of the current directory
+with open('config.json', 'r') as file:  # read config from file
     settings = json.load(file)
     exec_path = os.path.join(project_dir, settings['exec_path'])
     reservoir_data = os.path.join(project_dir, settings['reservoir_data_path'])
@@ -21,7 +23,7 @@ with open('config.json', 'r') as file:
     optimize_output = settings['optimize_name']
 
 fpath = project_dir
-fname = 'temp.xlsx'
+fname = 'temp.xlsx'  # the temporary file to save inputs
 
 # Define global variables
 entered_inputs, entered_limits, optimize_inputs = {}, {}, None
@@ -32,6 +34,7 @@ def home():
     return 'Backend Server'
 
 
+# The route for sending data of UK offshore reservoirs
 @bp.route('/reservoirs', methods=['GET'])
 def send_reservoirs():
     reservoirs = pd.read_excel(reservoir_data, sheet_name='UK_data')
@@ -43,6 +46,7 @@ def send_reservoirs():
         return jsonify({"error": "Reservoir not found"}), 404
 
 
+# The route for save model parameters from entered inputs or selected unit
 @bp.route('/save-inputs', methods=['POST'])
 def save_inputs():
     if os.path.exists(os.path.join(fpath, fname)):
@@ -72,10 +76,11 @@ def save_inputs():
         else:
             df[column][0] = float(value)
     print(df)
-    df.to_excel(os.path.join(fpath, fname), index=False)
+    df.to_excel(os.path.join(fpath, fname), index=False)  # write the inputs to the temporary file
     return 'backend received inputs', 201
 
 
+# The route to run the CO2BLOCK executable
 @bp.route('/model/enter-inputs/run', methods=['POST'])
 @bp.route('/model/map/run', methods=['POST'])
 def run_model():
@@ -98,6 +103,7 @@ def run_model():
     return 'CO2BLOCK ran successfully', 201
 
 
+# Run CO2BLOCK executable
 def run_executable(correction, dist_min, dist_max, nr_dist, nr_well_max, rw, time_yr, maxQ):
     result = ''
     try:
@@ -116,22 +122,24 @@ def run_executable(correction, dist_min, dist_max, nr_dist, nr_well_max, rw, tim
     return 0
 
 
+# The route to send the urls of generated outputs to the frontend
 @bp.route('/model/results', methods=['GET'])
 def get_results():
     outputs_urls = [url_for('routes.serve_output', filename=output) for output in outputs]
     return jsonify(outputs_urls)
 
 
+# Serve outputs urls from the outputs directory
 @bp.route('/model/results/<filename>')
 def serve_output(filename):
     return send_from_directory(outputs_dir, filename)
 
 
+# The route to send data including distance, well number, flow rate of maximum storage scenario
 @bp.route('/model/maxScenario', methods=['GET'])
 def get_max_scenario():
     df = pd.read_excel(outputs_dir + outputs[3])
     df_value = df.iloc[:, 1:]
-    # print(df_value)
 
     max_value = df_value.max().max()
     max_location = df_value.stack().idxmax()
@@ -143,12 +151,11 @@ def get_max_scenario():
     wellDistance = int(column_header.split('_')[4])
 
     df = pd.read_excel(outputs_dir + outputs[2])
-    df_value = df.iloc[:, 1:]
-    # print(df_value)
     flowRate = float(df.iloc[max_location[0], column_index])
     return {"maxStorage": max_value, "wellNum": wellNum, "wellDistance": wellDistance, "flowRate": flowRate}
 
 
+# The route to calculate revenue
 @bp.route('/optimize/run', methods=['POST'])
 def revenue_optimization():
     if os.path.exists(optimize_path):
@@ -161,6 +168,7 @@ def revenue_optimization():
     capture_cost_rate, transport_cost_rate = rates['capture_cost'], rates['transport_cost']
     revenue_rates = rates['revenue']
 
+    # Read outputs from model execution on the interface
     if readOutputs:
         well_num = max_storage_each_wellNum()
         try:
@@ -174,8 +182,10 @@ def revenue_optimization():
         well_num = max_storage_each_wellNum(None)
         name = 'Unknown'
 
+    # Compute overall cost
     costs = cost_calculation(well_num, capture_rate=capture_cost_rate, transport_rate=transport_cost_rate)
 
+    # Compute net revenues with different rates
     revenues, well_nums = [], []
     for rate in revenue_rates:
         revenue, wellNum = [], []
@@ -186,6 +196,7 @@ def revenue_optimization():
         revenues.append(revenue)
         well_nums.append(wellNum)
 
+    # Draw the plot depicting net revenue
     plt.figure(figsize=(8, 6))
     colors = ['blue', 'maroon', 'orange', 'purple', 'green', 'navy', 'darkgreen', 'red', 'pink', 'magenta']
     for i in range(len(revenue_rates)):
@@ -197,10 +208,11 @@ def revenue_optimization():
     plt.title(name)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(optimize_path)
+    plt.savefig(optimize_path)  # save the plot locally in the outputs directory
     return 'backend received rates', 201
 
 
+# Read maximum storage under each well number from model outputs or uploaded file
 def max_storage_each_wellNum(max_storage_file=outputs_dir + outputs[3]):
     if max_storage_file is None:
         global optimize_inputs
@@ -212,16 +224,17 @@ def max_storage_each_wellNum(max_storage_file=outputs_dir + outputs[3]):
     for i in range(len(df)):
         well_num = df['number_of_wells'][i]
         max_storage = df.iloc[:, 1:].iloc[i].max()
+        if (max_storage == 0) | (max_storage is None) | (max_storage == ""): continue
         well_num_storage.append({'wellNum': well_num, 'maxStorage': max_storage})
     return well_num_storage
 
 
+# Calculate overall cost
 def cost_calculation(well_num_storage, capture_rate=50, transport_rate=8):
     costs = []
     df = pd.read_excel(os.path.join(fpath, fname))
     drilling_cost = float(df['meanDepth'][0]) * 26
     for pairs in well_num_storage:
-        # print(pairs)
         well_num, storage = pairs['wellNum'], pairs['maxStorage']
         fixed_cost = 8200 * well_num
         surface_cost = 6120 * well_num
@@ -235,6 +248,7 @@ def cost_calculation(well_num_storage, capture_rate=50, transport_rate=8):
     return costs
 
 
+# The route for upload a file for revenue optimization
 @bp.route('/optimize/upload', methods=['POST'])
 def save_optimize_file():
     if 'file' not in request.files:
@@ -250,6 +264,7 @@ def save_optimize_file():
         return jsonify({'message': 'File successfully uploaded'}), 200
 
 
+# Send the url of revenue plot to frontend
 @bp.route('/optimize/result', methods=['GET'])
 def get_optimize_result():
     outputs_urls = [url_for('routes.serve_optimize', filename=optimize_output)]
@@ -261,13 +276,15 @@ def serve_optimize(filename):
     return send_from_directory(outputs_dir, filename)
 
 
+# The route for sending the urls of example files
 @bp.route('/help', methods=['GET'])
 def get_example():
-    examples_urls = [url_for('routes.serve_output', filename=name) for name in
-                    ['example_data.xlsx', 'V_M_max_storage_capacity.xls']]
+    examples_urls = [url_for('routes.serve_example', filename=name) for name in
+                     ['example_data.xlsx', 'V_M_max_storage_capacity.xls']]
     return jsonify(examples_urls)
 
 
+# Send the urls of example files from data directory
 @bp.route('/help/<filename>')
 def serve_example(filename):
     return send_from_directory(data_dir, filename)
