@@ -1,9 +1,13 @@
 {
-  "exec_path": "CO2BLOCK/executables/CO2BLOCK.exe",
+  "exec_path": "CO2BLOCK/executables/",
   "data_path": "CO2BLOCK/data/",
   "reservoir_data_path": "CO2BLOCK/data/reservoir_data.xlsx",
   "outputs_dir": "output/",
   "output_name": ["MaxFlowRatePerWell.png","MaxSustainableStorage.png",
     "Q_M_max_per_well_inj_rate.xls","V_M_max_storage_capacity.xls"],
-  "optimize_name": "optimize.png"
+  "optimize_name": "optimize.png",
+
+
+  "OS": "win",
+  "MRC_ROOT": ""
 }
