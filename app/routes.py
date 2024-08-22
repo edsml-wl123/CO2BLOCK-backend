@@ -15,7 +15,6 @@ project_dir = os.getcwd()  # get absolute path of the current directory
 with open('config.json', 'r') as file:  # read config from file
     settings = json.load(file)
     OS = settings['OS']
-    MRC_ROOT = settings['MRC_ROOT']
 
     exec_path = os.path.join(project_dir, settings['exec_path'], OS)
     reservoir_data = os.path.join(project_dir, settings['reservoir_data_path'])
@@ -117,9 +116,9 @@ def run_executable(correction, dist_min, dist_max, nr_dist, nr_well_max, rw, tim
                                     capture_output=True, text=True, encoding='utf-8')
         else:
             # Call the script using subprocess
-            result = subprocess.run([os.path.join(exec_path, "run_CO2BLOCK.sh"), MRC_ROOT, fpath, fname, correction,
+            result = subprocess.run([os.path.join(exec_path, "run_CO2BLOCK.sh"), fpath, fname, correction,
                                      dist_min, dist_max, nr_dist, nr_well_max, rw, time_yr, maxQ],
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if result.returncode != 0:
             raise Exception(result)
